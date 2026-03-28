@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-// Force IPv4 and Google DNS before anything else
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
@@ -14,14 +13,22 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ 
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:3001',
+    'https://internshield-five.vercel.app',
+    'https://internshield-4dxwdsin6-anjaniballaas-projects.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.options('*', cors());
 
 app.use('/api/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
-// Connect with all options
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -33,7 +40,6 @@ const connectDB = async () => {
     console.log('MongoDB connected');
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
-    // Retry after 5 seconds
     console.log('Retrying in 5 seconds...');
     setTimeout(connectDB, 5000);
   }
