@@ -19,42 +19,60 @@ router.get('/', auth, async (req, res) => {
 router.post('/connect', auth, async (req, res) => {
   try {
     const { repoName, repoUrl, githubToken } = req.body;
-    // e.g. repoName = "owner/repo"
+
+    if (!repoName || !repoUrl || !githubToken) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
     // Save github token to user
     await User.findByIdAndUpdate(req.user.id, { githubToken });
 
-    // Register webhook on GitHub
-    const webhookResponse = await axios.post(
-      `https://api.github.com/repos/${repoName}/hooks`,
-      {
-        name: 'web',
-        active: true,
-        events: ['push', 'pull_request'],
-        config: {
-          url: `${process.env.BACKEND_URL}/api/webhook`,
-          content_type: 'json',
-          secret: process.env.GITHUB_WEBHOOK_SECRET
+    // Check if already connected
+    const existing = await Project.findOne({ userId: req.user.id, repoName });
+    if (existing) {
+      return res.status(400).json({ message: 'Repository already connected' });
+    }
+
+    // Try to register webhook — but don't fail if it errors
+    let webhookId = null;
+    try {
+      const webhookResponse = await axios.post(
+        `https://api.github.com/repos/${repoName}/hooks`,
+        {
+          name: 'web',
+          active: true,
+          events: ['push', 'pull_request'],
+          config: {
+            url: `${process.env.BACKEND_URL}/api/webhook`,
+            content_type: 'json',
+            secret: process.env.GITHUB_WEBHOOK_SECRET
+          }
+        },
+        {
+          headers: {
+            Authorization: `token ${githubToken}`,
+            Accept: 'application/vnd.github+json'
+          }
         }
-      },
-      {
-        headers: {
-          Authorization: `token ${githubToken}`,
-          Accept: 'application/vnd.github+json'
-        }
-      }
-    );
+      );
+      webhookId = webhookResponse.data.id;
+      console.log('Webhook registered:', webhookId);
+    } catch (webhookErr) {
+      console.error('Webhook registration failed:', webhookErr.response?.data?.message || webhookErr.message);
+      // Don't return error — still save project, manual scan will work
+    }
 
     const project = await Project.create({
       userId: req.user.id,
       repoName,
       repoUrl,
-      webhookId: webhookResponse.data.id
+      webhookId
     });
 
     res.json(project);
   } catch (err) {
-    res.status(500).json({ message: err.response?.data?.message || err.message });
+    console.error('Connect error:', err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 
