@@ -46,12 +46,6 @@ It scans for hardcoded secrets, vulnerable dependencies, debug artifacts, and ri
 
 > This project was built to demonstrate a real understanding of what CI/CD actually means — not just "push code and it deploys," but the practice of **catching problems automatically, at every stage of the pipeline, before they become production incidents.**
 
-### **What I Understood About CI/CD While Building This**
-
-**Continuous Integration** means every code change is automatically tested and validated the moment it lands. InternShield implements this literally — the moment a developer pushes a commit or opens a PR, a GitHub Webhook fires, and the entire analysis pipeline runs without any human involvement. The code is integrated and checked *continuously*, not manually before a release.
-
-**Continuous Delivery** means your software is always in a deployable state, and the pipeline enforces that. InternShield's risk engine enforces this gate: a commit with a High Risk score gets a `failure` status on GitHub, which **blocks the merge button** on the PR. The pipeline doesn't just report problems — it prevents bad code from advancing.
-
 **The pipeline I implemented follows the exact shape of a real CI/CD flow:**
 
 ```
@@ -98,27 +92,6 @@ Report Saved to MongoDB               <- Audit Trail               │
         ▼
 Dashboard Updated
 ```
-
-**Every piece of this is automated.** The developer never has to remember to run a scan. They push code — the pipeline does the rest. That is CI/CD in practice.
-
-### **The Specific CI/CD Concepts This Project Implements**
-
-| Concept | How InternShield Implements It |
-|---|---|
-| **Automated triggers** | GitHub Webhooks fire on every `push` and `pull_request` event |
-| **Quality gates** | Risk score threshold blocks merges automatically |
-| **Commit status checks** | GitHub Statuses API marks commits as pass/fail |
-| **Shift-left security** | Security checks run at PR time, not post-deployment |
-| **Fast feedback loops** | Developer gets a full report comment on their PR within seconds |
-| **Audit trail** | Every scan is persisted to MongoDB with full history |
-| **Non-blocking async** | Webhook responds instantly (HTTP 200), processing runs async |
-| **Webhook signature verification** | `x-hub-signature-256` HMAC validation — production CI/CD security practice |
-
-<br/>
-
----
-
-<br/>
 
 ## **Feature Overview**
 
