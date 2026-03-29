@@ -256,40 +256,6 @@ npx ngrok http 5000
 
 <br/>
 
-## **Project Structure**
-
-```
-internshield/
-├── client/                     # React + Tailwind frontend
-│   └── src/
-│       ├── pages/
-│       │   ├── Home.jsx        # Dashboard: repos, stats, scan trigger
-│       │   ├── Report.jsx      # Full scan report with GPT findings
-│       │   ├── History.jsx     # Timeline chart of past scans
-│       │   └── Settings.jsx    # GitHub token + webhook config
-│       └── components/
-│           └── Layout.jsx      # Navbar + protected route wrapper
-│
-└── server/                     # Node.js + Express backend
-    ├── routes/
-    │   ├── auth.js             # JWT register/login
-    │   ├── projects.js         # Repo connect/disconnect
-    │   ├── scans.js            # History, stats, manual trigger
-    │   └── webhook.js          # GitHub event handler
-    └── services/
-        ├── scanner.js          # Static analysis (5 check types)
-        ├── dependencyChecker.js # npm audit API
-        ├── groqService.js      # Groq LLaMA enrichment
-        ├── riskEngine.js       # Weighted scoring
-        ├── githubService.js    # API: webhooks, status, comments
-        └── emailService.js     # High-risk email alerts
-```
-
-<br/>
-
----
-
-<br/>
 
 ## **Database Schema**
 
