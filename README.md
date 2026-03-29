@@ -1,8 +1,3 @@
-<div align="center">
-
-```
-INTERNSHEILD
-```
 
 ### **Stop bad code from reaching production. Before it ever gets the chance.**
 
